@@ -3,5 +3,6 @@ target/
 
 *.json
 *.html
+*.jar
 
 .envrc
