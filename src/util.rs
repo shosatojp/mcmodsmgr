@@ -28,6 +28,7 @@ pub fn print_addons(addons: &Vec<Addon>) {
 
 const MODLOADERS: [&str; 2] = ["forge", "fabric"];
 
+/// get a modloader type from gameVersions.
 pub fn game_version_tags_to_modloader(versions: &Vec<String>) -> Option<String> {
     for version in versions {
         let lower = version.to_lowercase();

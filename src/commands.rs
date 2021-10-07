@@ -25,7 +25,7 @@ pub async fn install(
     filename: Option<&str>,
     latest_only: bool,
 ) -> Result<(), String> {
-    // search
+    // search mod
     let target = match util::search_multiple_candidates(slug).await {
         Ok(value) => value,
         Err(_) => {
@@ -34,13 +34,14 @@ pub async fn install(
         }
     };
 
-    // filter by...
+    // get files and filter
     let mut orig_files = curseforge::get_files(target.id)
         .await
         .or(Err("failed to get files"))?;
     orig_files = util::sort_addonfiledetails_by(&mut orig_files, latest_only);
     let files = util::filter_addonfiledetails_by(&orig_files, version, modloader, fileid, filename);
 
+    // install
     match files.len() {
         1 => {
             let file = files.first().unwrap();
@@ -66,7 +67,7 @@ pub async fn describe(
     modloader: Option<&str>,
     latest_only: bool,
 ) -> Result<(), String> {
-    // search
+    // search mod
     let target = match util::search_multiple_candidates(slug).await {
         Ok(value) => value,
         Err(_) => {
@@ -75,14 +76,14 @@ pub async fn describe(
         }
     };
 
-    // filter by...
+    // get files and filter
     let mut orig_files = curseforge::get_files(target.id)
         .await
         .or(Err("failed to get files"))?;
     orig_files = util::sort_addonfiledetails_by(&mut orig_files, latest_only);
     let files = util::filter_addonfiledetails_by(&orig_files, version, modloader, None, None);
 
-    // list files
+    // print
     println!("{} (id:{})", target.name, target.id);
     println!();
     println!("{} downloads", target.downloadCount);
