@@ -6,6 +6,8 @@
 cargo install mcmodsmgr
 ```
 
+> `$HOME/.cargo/bin` should be in your `$PATH`
+
 ## Usage
 
 - Search
