@@ -1,3 +1,4 @@
+use crate::api::curseforge;
 use crate::api::curseforge_types::modloader_type;
 use crate::{Addon, AddonFile};
 use core::result::Result;
@@ -101,4 +102,20 @@ pub fn filter_addonfiles_by(
         })
         .cloned()
         .collect();
+}
+
+pub async fn search_multiple_candidates(slug: &str) -> Result<Addon, String> {
+    let mut candidates: Vec<&str> = vec![slug];
+    candidates.append(&mut slug.split(|c| " -+".contains(c)).collect());
+
+    for &candidate in &candidates {
+        let mut addons = curseforge::search(candidate).await.or(Err(""))?;
+        for addon in addons {
+            if addon.slug == slug {
+                return Ok(addon);
+            }
+        }
+    }
+
+    Err("not found".to_string())
 }
