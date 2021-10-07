@@ -14,8 +14,18 @@ cargo install mcmodsmgr
 mcmodsmgr search jei
 ```
 
+- Mod Information
+
+```sh
+mcmodsmgr describe jei
+```
+
 - Install
 
 ```sh
-mcmodsmgr install jei -v 1.12.2
+# filter by version
+mcmodsmgr -v 1.12.2 install jei
+
+# filter by version and modloader
+mcmodsmgr -v 1.12.2 -l forge install jei
 ```
