@@ -19,7 +19,7 @@ pub fn build_cli() -> ArgMatches {
                 .about("mod loader")
                 .takes_value(true)
                 .possible_value("forge")
-                .possible_value("fabric")
+                .possible_value("fabric"),
         )
         .subcommand(
             App::new("search")
@@ -31,10 +31,24 @@ pub fn build_cli() -> ArgMatches {
                 .about("download and place mod file")
                 .arg(Arg::new("name").takes_value(true))
                 .arg(
+                    Arg::new("fileid")
+                        .short('f')
+                        .long("fileid")
+                        .validator(|e| e.parse::<usize>())
+                        .takes_value(true),
+                )
+                .arg(
+                    Arg::new("filename")
+                        .short('n')
+                        .long("filename")
+                        .takes_value(true),
+                )
+                .arg(
                     Arg::new("dir")
                         .about("directory to place mod file(s)")
                         .short('d')
-                        .long("dir"),
+                        .long("dir")
+                        .takes_value(true),
                 ),
         )
         .subcommand(

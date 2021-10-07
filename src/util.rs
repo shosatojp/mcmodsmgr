@@ -56,10 +56,28 @@ pub fn filter_addonfiles_by(
     addonfiles: &Vec<AddonFile>,
     version: Option<&str>,
     modloader: Option<&str>,
+    fileid: Option<usize>,
+    filename: Option<&str>,
 ) -> Vec<AddonFile> {
     // filter by version
     return addonfiles
         .iter()
+        // filter by fileid
+        .filter(|&gameVersionLatestFile| {
+            if let Some(fileid) = fileid {
+                gameVersionLatestFile.projectFileId == fileid
+            } else {
+                true
+            }
+        })
+        // filter by filename
+        .filter(|&gameVersionLatestFile| {
+            if let Some(filename) = filename {
+                gameVersionLatestFile.projectFileName == filename
+            } else {
+                true
+            }
+        })
         // filter by version
         .filter(|&gameVersionLatestFile| {
             if let Some(version) = version {

@@ -30,6 +30,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 &addon.gameVersionLatestFiles,
                 app.value_of("version"),
                 app.value_of("modloader"),
+                None,
+                None,
             );
             !files.is_empty()
         });
@@ -51,12 +53,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 &target.gameVersionLatestFiles,
                 app.value_of("version"),
                 app.value_of("modloader"),
+                matches
+                    .value_of("fileid")
+                    .and_then(|e| Some(e.parse::<usize>().unwrap())),
+                matches.value_of("filename"),
             );
 
             match files.len() {
                 1 => {
                     let file = files.first().unwrap();
                     let fileinfo = curseforge::get_fileinfo(target.id, file.projectFileId).await?;
+                    eprintln!("downloading {} ...", fileinfo.fileName);
                     util::download_file(&fileinfo.downloadUrl, &format!("{}", &fileinfo.fileName))
                         .await?;
                 }
@@ -84,6 +91,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 &target.gameVersionLatestFiles,
                 app.value_of("version"),
                 app.value_of("modloader"),
+                None,
+                None,
             );
 
             // list files
