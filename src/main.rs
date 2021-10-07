@@ -22,11 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = cli::build_cli();
 
     if let Some(ref matches) = app.subcommand_matches("search") {
-        commands::search(
-            matches.value_of("name").unwrap(),
-            app.value_of("version"),
-            app.value_of("modloader"),
-        ).await?;
+        commands::search(matches.value_of("name").unwrap()).await?;
     } else if let Some(ref matches) = app.subcommand_matches("install") {
         commands::install(
             matches.value_of("name").unwrap(),
@@ -36,13 +32,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .value_of("fileid")
                 .and_then(|e| Some(e.parse::<usize>().unwrap())),
             matches.value_of("filename"),
-        ).await?;
+        )
+        .await?;
     } else if let Some(ref matches) = app.subcommand_matches("describe") {
         commands::describe(
             matches.value_of("name").unwrap(),
             app.value_of("version"),
             app.value_of("modloader"),
-        ).await?;
+        )
+        .await?;
     }
     Ok(())
 }

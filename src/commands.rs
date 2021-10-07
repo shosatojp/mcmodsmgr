@@ -6,24 +6,9 @@ pub use crate::api::curseforge_types::{Addon, AddonFile};
 use crate::util;
 use reqwest::Version;
 
-pub async fn search(
-    name: &str,
-    version: Option<&str>,
-    modloader: Option<&str>,
-) -> Result<(), String> {
+pub async fn search(name: &str) -> Result<(), String> {
     // search & filter
     let mut addons: Vec<Addon> = curseforge::search(name).await.or(Err("failed to search"))?;
-
-    addons.retain(|addon| {
-        let mut files = util::filter_addonfiles_by(
-            &addon.gameVersionLatestFiles,
-            version,
-            modloader,
-            None,
-            None,
-        );
-        !files.is_empty()
-    });
 
     // output
     if addons.len() > 0 {
