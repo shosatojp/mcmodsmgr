@@ -9,13 +9,7 @@ mod api {
     pub mod curseforge_types;
 }
 
-use core::panic;
-use std::process::exit;
-
-use api::curseforge;
-use api::curseforge_types::modloader_type;
 pub use api::curseforge_types::{Addon, AddonFile};
-use reqwest::Version;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

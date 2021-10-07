@@ -13,7 +13,7 @@ pub async fn download_file(url: &str, path: &str) -> Result<(), String> {
         .bytes()
         .await
         .or(Err("failed to get body"))?;
-    file.write(&content);
+    let _ = file.write(&content);
     Ok(())
 }
 
@@ -50,7 +50,7 @@ pub fn print_files(files: &Vec<AddonFileDetail>) {
     let mut table = prettytable::Table::new();
     table.add_row(row!["File Id", "Version", "Mod Loader", "File Name"]);
     for file in files {
-        let modLoader = game_version_tags_to_modloader(&file.gameVersion);
+        let mod_loader = game_version_tags_to_modloader(&file.gameVersion);
         let versions: Vec<String> = file
             .gameVersion
             .iter()
@@ -61,7 +61,7 @@ pub fn print_files(files: &Vec<AddonFileDetail>) {
         table.add_row(row![
             file.id,
             versions.join(", "),
-            modLoader.unwrap_or("-".to_string()),
+            mod_loader.unwrap_or("-".to_string()),
             file.fileName,
         ]);
     }
@@ -79,35 +79,35 @@ pub fn filter_addonfiles_by(
     return addonfiles
         .iter()
         // filter by fileid
-        .filter(|&gameVersionLatestFile| {
+        .filter(|&game_version_latest_file| {
             if let Some(fileid) = fileid {
-                gameVersionLatestFile.projectFileId == fileid
+                game_version_latest_file.projectFileId == fileid
             } else {
                 true
             }
         })
         // filter by filename
-        .filter(|&gameVersionLatestFile| {
+        .filter(|&game_version_latest_file| {
             if let Some(filename) = filename {
-                gameVersionLatestFile.projectFileName == filename
+                game_version_latest_file.projectFileName == filename
             } else {
                 true
             }
         })
         // filter by version
-        .filter(|&gameVersionLatestFile| {
+        .filter(|&game_version_latest_file| {
             if let Some(version) = version {
-                gameVersionLatestFile.gameVersion == version
+                game_version_latest_file.gameVersion == version
             } else {
                 true
             }
         })
         // filter by modloader
-        .filter(|&gameVersionLatestFile| {
+        .filter(|&game_version_latest_file| {
             if let Some(modloader) = modloader {
-                match gameVersionLatestFile.modLoader {
+                match game_version_latest_file.modLoader {
                     Some(val) => {
-                        val == modloader_name2id(modloader).unwrap_or(modloader_type::forge)
+                        val == modloader_name2id(modloader).unwrap_or(modloader_type::FORGE)
                     }
                     None => false,
                 }
@@ -197,7 +197,7 @@ pub async fn search_multiple_candidates(slug: &str) -> Result<Addon, String> {
     candidates.append(&mut slug.split(|c| " -+".contains(c)).collect());
 
     for &candidate in &candidates {
-        let mut addons = curseforge::search(candidate).await.or(Err(""))?;
+        let addons = curseforge::search(candidate).await.or(Err(""))?;
         for addon in addons {
             if addon.slug == slug {
                 return Ok(addon);

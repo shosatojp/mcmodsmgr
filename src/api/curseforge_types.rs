@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io::Read, string};
 
 pub mod modloader_type {
-    pub const forge: usize = 1;
-    pub const fabric: usize = 4;
+    pub const FORGE: usize = 1;
+    pub const FABLIC: usize = 4;
 }
 
 #[allow(non_snake_case)]

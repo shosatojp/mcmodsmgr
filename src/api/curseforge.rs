@@ -16,8 +16,8 @@ pub async fn search(query: &str) -> Result<Vec<Addon>, Box<dyn std::error::Error
     Ok(addons)
 }
 
-pub async fn get_files(addonId: usize) -> Result<Vec<AddonFileDetail>, Box<dyn std::error::Error>> {
-    let url = format!("{}/addon/{}/files", BASE_URL, addonId);
+pub async fn get_files(addon_id: usize) -> Result<Vec<AddonFileDetail>, Box<dyn std::error::Error>> {
+    let url = format!("{}/addon/{}/files", BASE_URL, addon_id);
     let body = reqwest::get(url).await?.text().await?;
     
     let files: Vec<AddonFileDetail> = serde_json::from_str(&body)?;
@@ -26,10 +26,10 @@ pub async fn get_files(addonId: usize) -> Result<Vec<AddonFileDetail>, Box<dyn s
 }
 
 pub async fn get_fileinfo(
-    addonId: usize,
-    fileId: usize,
+    addon_id: usize,
+    file_id: usize,
 ) -> Result<AddonFileDetail, Box<dyn std::error::Error>> {
-    let url = format!("{}/addon/{}/file/{}", BASE_URL, addonId, fileId);
+    let url = format!("{}/addon/{}/file/{}", BASE_URL, addon_id, file_id);
     let body = reqwest::get(url).await?.text().await?;
 
     let file_detail: AddonFileDetail = serde_json::from_str(&body)?;

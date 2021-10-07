@@ -1,14 +1,10 @@
-use std::process::exit;
-
 use crate::api::curseforge;
-use crate::api::curseforge_types::modloader_type;
-pub use crate::api::curseforge_types::{Addon, AddonFile};
+pub use crate::api::curseforge_types::Addon;
 use crate::util;
-use reqwest::Version;
 
 pub async fn search(name: &str) -> Result<(), String> {
     // search & filter
-    let mut addons: Vec<Addon> = curseforge::search(name).await.or(Err("failed to search"))?;
+    let addons: Vec<Addon> = curseforge::search(name).await.or(Err("failed to search"))?;
 
     // output
     if addons.len() > 0 {
@@ -30,7 +26,7 @@ pub async fn install(
     latest_only: bool,
 ) -> Result<(), String> {
     // search
-    let mut target = match util::search_multiple_candidates(slug).await {
+    let target = match util::search_multiple_candidates(slug).await {
         Ok(value) => value,
         Err(_) => {
             eprintln!("mod not found");
@@ -43,8 +39,7 @@ pub async fn install(
         .await
         .or(Err("failed to get files"))?;
     orig_files = util::sort_addonfiledetails_by(&mut orig_files, latest_only);
-    let mut files =
-        util::filter_addonfiledetails_by(&orig_files, version, modloader, fileid, filename);
+    let files = util::filter_addonfiledetails_by(&orig_files, version, modloader, fileid, filename);
 
     match files.len() {
         1 => {
@@ -72,7 +67,7 @@ pub async fn describe(
     latest_only: bool,
 ) -> Result<(), String> {
     // search
-    let mut target = match util::search_multiple_candidates(slug).await {
+    let target = match util::search_multiple_candidates(slug).await {
         Ok(value) => value,
         Err(_) => {
             eprintln!("mod not found");
@@ -85,7 +80,7 @@ pub async fn describe(
         .await
         .or(Err("failed to get files"))?;
     orig_files = util::sort_addonfiledetails_by(&mut orig_files, latest_only);
-    let mut files = util::filter_addonfiledetails_by(&orig_files, version, modloader, None, None);
+    let files = util::filter_addonfiledetails_by(&orig_files, version, modloader, None, None);
 
     // list files
     println!("{} (id:{})", target.name, target.id);
