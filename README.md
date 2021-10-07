@@ -1,5 +1,11 @@
 # Minecraft Mods Manager
 
+## Install
+
+```sh
+cargo install mcmodsmgr
+```
+
 ## Usage
 
 - Search
