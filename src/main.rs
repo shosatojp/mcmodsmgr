@@ -8,9 +8,11 @@ mod api {
     pub mod curseforge_types;
 }
 
-use std::{process::exit, ptr::NonNull};
+use core::panic;
+use std::process::exit;
 
 use api::curseforge;
+use api::curseforge_types::modloader_type;
 pub use api::curseforge_types::{Addon, AddonFile};
 use reqwest::Version;
 
@@ -21,25 +23,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(ref matches) = app.subcommand_matches("search") {
         let name = matches.value_of("name").unwrap();
 
-        // search
-        let mut addons = curseforge::search(name).await?;
-
-        // filter by version
-        if let Some(version) = matches.value_of("version") {
-            addons.retain(|addon| {
-                addon
-                    .gameVersionLatestFiles
-                    .iter()
-                    .any(|gameVersionLatestFile| gameVersionLatestFile.gameVersion == version)
-            })
-        }
+        // search & filter
+        let mut addons: Vec<Addon> = curseforge::search(name).await?;
+        addons.retain(|addon| {
+            let mut files = util::filter_addonfiles_by(
+                &addon.gameVersionLatestFiles,
+                app.value_of("version"),
+                app.value_of("modloader"),
+            );
+            !files.is_empty()
+        });
 
         // output
         if addons.len() > 0 {
             util::print_addons(&addons);
             println!("found {} mod(s)", addons.len());
         } else {
-            eprintln!("not found");
+            eprintln!("mod not found");
             exit(1);
         }
     } else if let Some(ref matches) = app.subcommand_matches("install") {
@@ -47,24 +47,56 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // search
         let mut addons = curseforge::search(slug).await?;
         if let Some(target) = addons.iter().find(|&addon| addon.slug == slug) {
-            let file = match matches.value_of("version") {
-                Some(version) => target
-                    .gameVersionLatestFiles
-                    .iter()
-                    .find(|&file| file.gameVersion == version),
-                None => target.gameVersionLatestFiles.iter().next(),
-            };
+            let mut files = util::filter_addonfiles_by(
+                &target.gameVersionLatestFiles,
+                app.value_of("version"),
+                app.value_of("modloader"),
+            );
 
-            match file {
-                Some(file) => {
+            match files.len() {
+                1 => {
+                    let file = files.first().unwrap();
                     let fileinfo = curseforge::get_fileinfo(target.id, file.projectFileId).await?;
                     util::download_file(&fileinfo.downloadUrl, &format!("{}", &fileinfo.fileName))
                         .await?;
                 }
-                None => panic!("file not found for version"),
+                0 => {
+                    eprintln!("file not found for version");
+                    exit(1);
+                }
+                _ => {
+                    eprintln!("multiple candidates found");
+                    util::print_files(&files);
+                    exit(1);
+                }
             }
         } else {
-            panic!("mod not found");
+            eprintln!("mod not found");
+            exit(1);
+        }
+    } else if let Some(ref matches) = app.subcommand_matches("describe") {
+        let slug = matches.value_of("name").unwrap();
+        // search
+        let mut addons = curseforge::search(slug).await?;
+        if let Some(target) = addons.iter().find(|&addon| addon.slug == slug) {
+            // filter by...
+            let mut files = util::filter_addonfiles_by(
+                &target.gameVersionLatestFiles,
+                app.value_of("version"),
+                app.value_of("modloader"),
+            );
+
+            // list files
+            println!("{} (id:{})", target.name, target.id);
+            println!();
+            println!("{} downloads", target.downloadCount);
+            println!("{}", target.websiteUrl);
+            println!();
+            println!("files:");
+            util::print_files(&files);
+        } else {
+            eprintln!("mod not found");
+            exit(1);
         }
     }
     Ok(())
