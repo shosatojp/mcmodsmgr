@@ -138,7 +138,9 @@ pub async fn search_multiple_candidates(slug: &str) -> Result<Addon, String> {
     candidates.append(&mut slug.split(|c| " -+".contains(c)).collect());
 
     for &candidate in &candidates {
-        let addons = curseforge::search(candidate).await.or(Err(""))?;
+        let addons = curseforge::search(candidate)
+            .await
+            .or(Err(format!("failed to search '{}'", candidate)))?;
         for addon in addons {
             if addon.slug == slug {
                 return Ok(addon);
