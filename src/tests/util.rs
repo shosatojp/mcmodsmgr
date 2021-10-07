@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use crate::util::game_version_tags_to_modloader;
 
 #[test]

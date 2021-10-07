@@ -1,4 +1,6 @@
+#[allow(unused_imports)]
 use crate::api::curseforge::{get_files, search};
+#[allow(unused_imports)]
 use crate::util::{print_addons, print_files};
 
 #[tokio::test]
