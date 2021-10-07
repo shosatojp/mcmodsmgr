@@ -6,6 +6,9 @@ mod commands;
 mod util;
 mod tests {
     pub mod util;
+    mod api {
+        pub mod curseforge;
+    }
 }
 mod api {
     pub mod curseforge;
