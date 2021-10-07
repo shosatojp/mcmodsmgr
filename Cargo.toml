@@ -4,6 +4,7 @@ version = "0.0.1"
 edition = "2018"
 description = "Manage Minecraft mods registered at curseforge.com"
 license = "MIT"
+repository = "https://github.com/shosatojp/mcmodsmgr"
 
 [dependencies]
 tokio = { version = "~1.12.0", features = ["full"] }
