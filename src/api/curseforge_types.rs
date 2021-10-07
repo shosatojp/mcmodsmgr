@@ -42,7 +42,7 @@ pub struct AddonFileDetail {
     pub id: usize,
     pub displayName: String,
     pub fileName: String,
-    pub fileDate: String,
+    pub fileDate: chrono::DateTime<chrono::Utc>,
     pub fileLength: usize,
     pub downloadUrl: String,
     pub isAvailable: bool,

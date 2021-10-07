@@ -27,6 +27,7 @@ pub async fn install(
     modloader: Option<&str>,
     fileid: Option<usize>,
     filename: Option<&str>,
+    latest_only: bool,
 ) -> Result<(), String> {
     // search
     let mut target = match util::search_multiple_candidates(slug).await {
@@ -38,18 +39,16 @@ pub async fn install(
     };
 
     // filter by...
-    let orig_files = curseforge::get_files(target.id)
+    let mut orig_files = curseforge::get_files(target.id)
         .await
         .or(Err("failed to get files"))?;
+    orig_files = util::sort_addonfiledetails_by(&mut orig_files, latest_only);
     let mut files =
         util::filter_addonfiledetails_by(&orig_files, version, modloader, fileid, filename);
 
     match files.len() {
         1 => {
             let file = files.first().unwrap();
-            // let fileinfo = curseforge::get_fileinfo(target.id, file.id)
-            //     .await
-            //     .or(Err("failed to fetch fileinfo"))?;
             eprintln!("downloading {} ...", file.fileName);
             util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
             return Ok(());
@@ -70,6 +69,7 @@ pub async fn describe(
     slug: &str,
     version: Option<&str>,
     modloader: Option<&str>,
+    latest_only: bool,
 ) -> Result<(), String> {
     // search
     let mut target = match util::search_multiple_candidates(slug).await {
@@ -81,9 +81,10 @@ pub async fn describe(
     };
 
     // filter by...
-    let orig_files = curseforge::get_files(target.id)
+    let mut orig_files = curseforge::get_files(target.id)
         .await
         .or(Err("failed to get files"))?;
+    orig_files = util::sort_addonfiledetails_by(&mut orig_files, latest_only);
     let mut files = util::filter_addonfiledetails_by(&orig_files, version, modloader, None, None);
 
     // list files

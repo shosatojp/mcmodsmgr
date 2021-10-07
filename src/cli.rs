@@ -21,6 +21,13 @@ pub fn build_cli() -> ArgMatches {
                 .possible_value("forge")
                 .possible_value("fabric"),
         )
+        .arg(
+            Arg::new("full")
+                .short('F')
+                .long("full")
+                .takes_value(false)
+                .about("show all files instead of listing only latest files for each version"),
+        )
         .subcommand(
             App::new("search")
                 .about("search mods from curseforge.com")

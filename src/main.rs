@@ -32,6 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .value_of("fileid")
                 .and_then(|e| Some(e.parse::<usize>().unwrap())),
             matches.value_of("filename"),
+            !app.is_present("full"),
         )
         .await?;
     } else if let Some(ref matches) = app.subcommand_matches("describe") {
@@ -39,6 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             matches.value_of("name").unwrap(),
             app.value_of("version"),
             app.value_of("modloader"),
+            !app.is_present("full"),
         )
         .await?;
     }
