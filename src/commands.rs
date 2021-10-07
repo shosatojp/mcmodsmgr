@@ -13,6 +13,7 @@ pub async fn search(
 ) -> Result<(), String> {
     // search & filter
     let mut addons: Vec<Addon> = curseforge::search(name).await.or(Err("failed to search"))?;
+
     addons.retain(|addon| {
         let mut files = util::filter_addonfiles_by(
             &addon.gameVersionLatestFiles,
@@ -51,23 +52,21 @@ pub async fn install(
         }
     };
 
-    // filter
-    let mut files = util::filter_addonfiles_by(
-        &target.gameVersionLatestFiles,
-        version,
-        modloader,
-        fileid,
-        filename,
-    );
+    // filter by...
+    let orig_files = curseforge::get_files(target.id)
+        .await
+        .or(Err("failed to get files"))?;
+    let mut files =
+        util::filter_addonfiledetails_by(&orig_files, version, modloader, fileid, filename);
 
     match files.len() {
         1 => {
             let file = files.first().unwrap();
-            let fileinfo = curseforge::get_fileinfo(target.id, file.projectFileId)
-                .await
-                .or(Err("failed to fetch fileinfo"))?;
-            eprintln!("downloading {} ...", fileinfo.fileName);
-            util::download_file(&fileinfo.downloadUrl, &format!("{}", &fileinfo.fileName)).await?;
+            // let fileinfo = curseforge::get_fileinfo(target.id, file.id)
+            //     .await
+            //     .or(Err("failed to fetch fileinfo"))?;
+            eprintln!("downloading {} ...", file.fileName);
+            util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
             return Ok(());
         }
         0 => {
@@ -88,28 +87,27 @@ pub async fn describe(
     modloader: Option<&str>,
 ) -> Result<(), String> {
     // search
-    let mut addons = curseforge::search(slug).await.or(Err("failed to search"))?;
-    if let Some(target) = addons.iter().find(|&addon| addon.slug == slug) {
-        // filter by...
-        let mut files = util::filter_addonfiles_by(
-            &target.gameVersionLatestFiles,
-            version,
-            modloader,
-            None,
-            None,
-        );
+    let mut target = match util::search_multiple_candidates(slug).await {
+        Ok(value) => value,
+        Err(_) => {
+            eprintln!("mod not found");
+            return Err("mod not found".to_string());
+        }
+    };
 
-        // list files
-        println!("{} (id:{})", target.name, target.id);
-        println!();
-        println!("{} downloads", target.downloadCount);
-        println!("{}", target.websiteUrl);
-        println!();
-        println!("files:");
-        util::print_files(&files);
-        return Ok(());
-    } else {
-        eprintln!("mod not found");
-        return Err("mod not found".to_string());
-    }
+    // filter by...
+    let orig_files = curseforge::get_files(target.id)
+        .await
+        .or(Err("failed to get files"))?;
+    let mut files = util::filter_addonfiledetails_by(&orig_files, version, modloader, None, None);
+
+    // list files
+    println!("{} (id:{})", target.name, target.id);
+    println!();
+    println!("{} downloads", target.downloadCount);
+    println!("{}", target.websiteUrl);
+    println!();
+    println!("files:");
+    util::print_files(&files);
+    Ok(())
 }

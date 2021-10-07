@@ -1,5 +1,5 @@
 use crate::api::curseforge;
-use crate::api::curseforge_types::modloader_type;
+use crate::api::curseforge_types::{modloader_type, AddonFileDetail};
 use crate::{Addon, AddonFile};
 use core::result::Result;
 use std::io::Write;
@@ -33,21 +33,28 @@ pub fn modloader_name2id(name: &str) -> Result<usize, ()> {
     }
 }
 
-pub fn print_files(files: &Vec<AddonFile>) {
+pub fn game_version_tags_to_modloader(versions: &Vec<String>) -> Option<String> {
+    let modloaders = vec!["forge", "fabric"];
+    for version in versions {
+        let lower = version.to_lowercase();
+        if modloaders.contains(&lower.as_str()) {
+            return Some(lower);
+        }
+    }
+    None
+}
+
+pub fn print_files(files: &Vec<AddonFileDetail>) {
     let mut table = prettytable::Table::new();
     table.add_row(row!["File Id", "Version", "Mod Loader", "File Name"]);
     for file in files {
-        let modLoader = match file.modLoader {
-            Some(1) => "forge",
-            Some(4) => "fabric",
-            Some(_) => "forge?",
-            None => "-",
-        };
+        let modLoader = game_version_tags_to_modloader(&file.gameVersion);
+
         table.add_row(row![
-            file.projectFileId,
-            file.gameVersion,
-            modLoader,
-            file.projectFileName,
+            file.id,
+            file.gameVersion.join(", "),
+            modLoader.unwrap_or("-".to_string()),
+            file.fileName,
         ]);
     }
     table.printstd();
@@ -94,6 +101,55 @@ pub fn filter_addonfiles_by(
                     Some(val) => {
                         val == modloader_name2id(modloader).unwrap_or(modloader_type::forge)
                     }
+                    None => false,
+                }
+            } else {
+                true
+            }
+        })
+        .cloned()
+        .collect();
+}
+
+pub fn filter_addonfiledetails_by(
+    addonfiles: &Vec<AddonFileDetail>,
+    version: Option<&str>,
+    modloader: Option<&str>,
+    fileid: Option<usize>,
+    filename: Option<&str>,
+) -> Vec<AddonFileDetail> {
+    // filter by version
+    return addonfiles
+        .iter()
+        // filter by fileid
+        .filter(|&file| {
+            if let Some(fileid) = fileid {
+                file.id == fileid
+            } else {
+                true
+            }
+        })
+        // filter by filename
+        .filter(|&file| {
+            if let Some(filename) = filename {
+                file.fileName == filename
+            } else {
+                true
+            }
+        })
+        // filter by version
+        .filter(|&file| {
+            if let Some(version) = version {
+                file.gameVersion.contains(&version.to_string())
+            } else {
+                true
+            }
+        })
+        // filter by modloader
+        .filter(|&file| {
+            if let Some(modloader) = modloader {
+                match game_version_tags_to_modloader(&file.gameVersion) {
+                    Some(val) => val == modloader,
                     None => false,
                 }
             } else {

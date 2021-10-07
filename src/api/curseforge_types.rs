@@ -37,7 +37,7 @@ pub struct Addon {
 }
 
 #[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct AddonFileDetail {
     pub id: usize,
     pub displayName: String,
@@ -46,4 +46,5 @@ pub struct AddonFileDetail {
     pub fileLength: usize,
     pub downloadUrl: String,
     pub isAvailable: bool,
+    pub gameVersion: Vec<String>,
 }
