@@ -24,15 +24,3 @@ pub async fn get_files(addon_id: usize) -> Result<Vec<AddonFileDetail>, Box<dyn 
 
     Ok(files)
 }
-
-pub async fn get_fileinfo(
-    addon_id: usize,
-    file_id: usize,
-) -> Result<AddonFileDetail, Box<dyn std::error::Error>> {
-    let url = format!("{}/addon/{}/file/{}", BASE_URL, addon_id, file_id);
-    let body = reqwest::get(url).await?.text().await?;
-
-    let file_detail: AddonFileDetail = serde_json::from_str(&body)?;
-
-    Ok(file_detail)
-}

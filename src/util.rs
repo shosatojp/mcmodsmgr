@@ -1,6 +1,6 @@
 use crate::api::curseforge;
-use crate::api::curseforge_types::{modloader_type, AddonFileDetail};
-use crate::{Addon, AddonFile};
+use crate::api::curseforge_types::AddonFileDetail;
+use crate::Addon;
 use core::result::Result;
 use std::collections::HashSet;
 use std::io::Write;
@@ -24,14 +24,6 @@ pub fn print_addons(addons: &Vec<Addon>) {
         table.add_row(row![addon.id, addon.name, format!("{}", addon.slug)]);
     }
     table.printstd();
-}
-
-pub fn modloader_name2id(name: &str) -> Result<usize, ()> {
-    match name {
-        "forge" => Ok(1),
-        "fabric" => Ok(4),
-        _ => Err(()),
-    }
 }
 
 const MODLOADERS: [&str; 2] = ["forge", "fabric"];
@@ -66,57 +58,6 @@ pub fn print_files(files: &Vec<AddonFileDetail>) {
         ]);
     }
     table.printstd();
-}
-
-pub fn filter_addonfiles_by(
-    addonfiles: &Vec<AddonFile>,
-    version: Option<&str>,
-    modloader: Option<&str>,
-    fileid: Option<usize>,
-    filename: Option<&str>,
-) -> Vec<AddonFile> {
-    // filter by version
-    return addonfiles
-        .iter()
-        // filter by fileid
-        .filter(|&game_version_latest_file| {
-            if let Some(fileid) = fileid {
-                game_version_latest_file.projectFileId == fileid
-            } else {
-                true
-            }
-        })
-        // filter by filename
-        .filter(|&game_version_latest_file| {
-            if let Some(filename) = filename {
-                game_version_latest_file.projectFileName == filename
-            } else {
-                true
-            }
-        })
-        // filter by version
-        .filter(|&game_version_latest_file| {
-            if let Some(version) = version {
-                game_version_latest_file.gameVersion == version
-            } else {
-                true
-            }
-        })
-        // filter by modloader
-        .filter(|&game_version_latest_file| {
-            if let Some(modloader) = modloader {
-                match game_version_latest_file.modLoader {
-                    Some(val) => {
-                        val == modloader_name2id(modloader).unwrap_or(modloader_type::FORGE)
-                    }
-                    None => false,
-                }
-            } else {
-                true
-            }
-        })
-        .cloned()
-        .collect();
 }
 
 pub fn filter_addonfiledetails_by(

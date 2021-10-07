@@ -1,10 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-pub mod modloader_type {
-    pub const FORGE: usize = 1;
-    pub const FABLIC: usize = 4;
-}
-
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct AddonFile {
