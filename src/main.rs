@@ -4,6 +4,9 @@ extern crate prettytable;
 mod cli;
 mod commands;
 mod util;
+mod tests {
+    pub mod util;
+}
 mod api {
     pub mod curseforge;
     pub mod curseforge_types;
