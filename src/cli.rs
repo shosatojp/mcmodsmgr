@@ -1,7 +1,7 @@
 use clap::{crate_authors, crate_description, crate_name, crate_version};
-pub use clap::{App, Arg, ArgMatches};
+pub use clap::{App, AppSettings, Arg, ArgMatches};
 
-pub fn build_cli() -> ArgMatches {
+pub fn build_cli() -> App<'static> {
     let app = App::new(crate_name!())
         .version(crate_version!())
         .author(crate_authors!())
@@ -62,8 +62,7 @@ pub fn build_cli() -> ArgMatches {
             App::new("describe")
                 .about("describe a mod and list available files")
                 .arg(Arg::new("name").takes_value(true).required(true)),
-        )
-        .get_matches();
+        );
 
     app
 }
