@@ -31,6 +31,13 @@ pub fn build_cli() -> App<'static, 'static> {
                 .global(true)
                 .help("show all files instead of listing only latest files for each version"),
         )
+        .arg(
+            Arg::with_name("lockfile")
+                .short("L")
+                .long("lockfile")
+                .global(true)
+                .takes_value(true),
+        )
         .subcommand(
             App::new("search")
                 .about("search mods from curseforge.com")

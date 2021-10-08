@@ -3,7 +3,7 @@ BIN:=mcmodsmgr
 PROFILE:=release
 BIN_PATH:=target/$(TARGET)/$(PROFILE)/$(BIN)
 RUST_MUSL_BUILDER:=docker run -v $(shell pwd):/home/rust/src ekidd/rust-musl-builder
-
+VERSION=$(shell cat Cargo.toml | grep ^version | sed -E 's/^version = "([0-9.]+)"/\1/')
 ARTIFACTS_DIR:=artifacts
 
 build:
@@ -20,6 +20,5 @@ pull:
 	mkdir -p $(ARTIFACTS_DIR)
 	gh run download -n executable -D $(ARTIFACTS_DIR)
 
-release: pull
-	VERSION=`cat Cargo.toml | grep ^version | sed -E 's/^version = "([0-9.]+)"$/\1/'`
-	gh release create -t "v${VERSION}" $(ARTIFACTS_DIR)/*
+release:
+	gh release create "v$(VERSION)" $(ARTIFACTS_DIR)/*
