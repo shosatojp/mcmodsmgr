@@ -74,11 +74,11 @@ jobs:
 
       - name: Rename
         if: runner.os == 'Windows'
-        run: move target/${{matrix.target}}/${{env.PROFILE}}/${{env.bin_name}} ${{env.PROJECT_NAME}}-${{matrix.target}}.exe
+        run: move target/${{matrix.target}}/${{env.PROFILE}}/${{matrix.bin_name}} ${{env.PROJECT_NAME}}-${{matrix.target}}.exe
 
       - name: Rename
         if: runner.os == 'macOS'
-        run: mv target/${{matrix.target}}/${{env.PROFILE}}/${{env.bin_name}} ${{env.PROJECT_NAME}}-${{matrix.target}}
+        run: mv target/${{matrix.target}}/${{env.PROFILE}}/${{matrix.bin_name}} ${{env.PROJECT_NAME}}-${{matrix.target}}
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
