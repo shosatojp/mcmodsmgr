@@ -31,7 +31,7 @@ jobs:
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: Executable
+        name: executable-linux
         path: target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
 
 
@@ -47,8 +47,10 @@ jobs:
         include:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
+            osname: windows
           - target: x86_64-apple-darwin
             os: macos-latest
+            osname: macos
 
     steps:
     - uses: actions/checkout@v2
@@ -69,5 +71,5 @@ jobs:
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: Executable
+        name: executable-${{matrix.osname}}
         path: target/${{matrix.target}}/${{env.PROFILE}}/${{env.BIN_NAME}}*
