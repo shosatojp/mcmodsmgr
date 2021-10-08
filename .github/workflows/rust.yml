@@ -21,16 +21,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Build
         run: docker run -u root:root -v $(pwd):/home/rust/src ekidd/rust-musl-builder cargo build --target $TARGET --$PROFILE
+
       - name: Chown
         run: sudo chown $(id -u):$(id -g) -R .
+
       # - name: Strip
       #   run: strip target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
+
       - name: Run tests
         run: cargo test --verbose
+
       - name: Rename
         run: mv target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}} ${{env.PROJECT_NAME}}-${{env.TARGET}}
+
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
