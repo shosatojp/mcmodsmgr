@@ -16,6 +16,7 @@ test:
 	$(RUST_MUSL_BUILDER) cargo test
 
 pull:
+	rm -rf $(ARTIFACTS_DIR)
 	mkdir -p $(ARTIFACTS_DIR)
 	gh run download -n executable -D $(ARTIFACTS_DIR)
 
