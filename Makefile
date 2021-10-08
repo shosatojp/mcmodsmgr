@@ -2,7 +2,7 @@ TARGET:=x86_64-unknown-linux-musl
 BIN:=mcmodsmgr
 PROFILE:=release
 BIN_PATH:=target/$(TARGET)/$(PROFILE)/$(BIN)
-RUST_MUSL_BUILDER:=docker run -v $(shell pwd):/home/rust/src ekidd/rust-musl-builder
+RUST_MUSL_BUILDER:=docker run -u root:root -v $(shell pwd):/home/rust/src ekidd/rust-musl-builder
 
 build:
 	$(RUST_MUSL_BUILDER) cargo build --target $(TARGET) --$(PROFILE)
