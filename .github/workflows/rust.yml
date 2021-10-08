@@ -9,6 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   PROFILE: release
+  PROJECT_NAME: mcmodsmgr
 
 jobs:
   build-linux:
@@ -16,7 +17,7 @@ jobs:
     timeout-minutes: 10
     env:
       TARGET: x86_64-unknown-linux-musl
-      BIN_NAME: mcmodsmgr-x86_64-unknown-linux-musl
+      BIN_NAME: mcmodsmgr
 
     steps:
       - uses: actions/checkout@v2
@@ -28,11 +29,13 @@ jobs:
       #   run: strip target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
       - name: Run tests
         run: cargo test --verbose
+      - name: Rename
+        run: mv target/${{matrix.target}}/${{env.PROFILE}}/${{env.BIN_NAME}} ${{env.PROJECT_NAME}}-${{env.TARGET}}
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: executable-linux
-          path: target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
+          name: executable
+          path: ${{env.PROJECT_NAME}}-${{env.TARGET}}
 
   build:
     runs-on: ${{matrix.os}}
@@ -47,11 +50,11 @@ jobs:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             osname: windows
-            bin_name: mcmodsmgr-x86_64-pc-windows-msvc.exe
+            bin_name: mcmodsmgr.exe
           - target: x86_64-apple-darwin
             os: macos-latest
             osname: macos
-            bin_name: mcmodsmgr-x86_64-apple-darwin
+            bin_name: mcmodsmgr
 
     steps:
       - uses: actions/checkout@v2
@@ -69,8 +72,16 @@ jobs:
       - name: Run tests
         run: cargo test
 
+      - name: Rename
+        if: runner.os == 'Windows'
+        run: move target/${{matrix.target}}/${{env.PROFILE}}/${{env.BIN_NAME}} ${{env.PROJECT_NAME}}-${{matrix.target}}.exe
+
+      - name: Rename
+        if: runner.os == 'macOS'
+        run: mv target/${{matrix.target}}/${{env.PROFILE}}/${{env.BIN_NAME}} ${{env.PROJECT_NAME}}-${{matrix.target}}
+
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: executable-${{matrix.osname}}
-          path: target/${{matrix.target}}/${{env.PROFILE}}/${{env.BIN_NAME}}
+          name: executable
+          path: ${{env.PROJECT_NAME}}-${{matrix.target}}*
