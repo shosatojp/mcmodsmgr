@@ -8,23 +8,31 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  PROFILE: release
+  BIN_NAME: mcmodsmgr
 
 jobs:
   build-linux:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      TARGET: x86_64-unknown-linux-musl
 
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: make build
+      run: docker run -u root:root -v $(pwd):/home/rust/src ekidd/rust-musl-builder cargo build --target $TARGET --$PROFILE
+    - name: Chown
+      run: sudo chown $(id -u):$(id -g) target/$TARGET/$PROFILE/$BIN_NAME
+    - name: Strip
+      run: strip target/$TARGET/$PROFILE/$BIN_NAME
     - name: Run tests
       run: cargo test --verbose
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
         name: Executable
-        path: target/x86_64-unknown-linux-musl/release/mcmodsmgr
+        path: target/$TARGET/$PROFILE/$BIN_NAME
 
 
   build:
@@ -53,7 +61,7 @@ jobs:
         target: ${{matrix.target}}
 
     - name: Build
-      run: cargo build --release --target ${{matrix.target}}
+      run: cargo build --$PROFILE --target ${{matrix.target}}
 
     - name: Run tests
       run: cargo test
@@ -62,4 +70,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Executable
-        path: target/${{matrix.target}}/release/mcmodsmgr
+        path: target/${{matrix.target}}/$PROFILE/$BIN_NAME*
