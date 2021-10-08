@@ -48,7 +48,7 @@ jobs:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
           - target: x86_64-apple-darwin
-            os: maxos-latest
+            os: macos-latest
 
     steps:
     - uses: actions/checkout@v2
