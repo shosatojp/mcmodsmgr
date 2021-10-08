@@ -10,13 +10,45 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: cargo build --verbose
+      run: make build
+    - name: Run tests
+      run: cargo test --verbose
+
+
+  build:
+    runs-on: ${{matrix.os}}
+    timeout-minutes: 5
+
+    strategy:
+      matrix:
+        target:
+          - x86_64-pc-windows-msvc
+          - x86_64-apple-darwin
+        include:
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-apple-darwin
+            os: maxos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Rust Toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+        target: ${{matrix.target}}
+
+    - name: Build
+      run: cargo build --release --target ${{matrix.target}}
+
     - name: Run tests
       run: cargo test --verbose
