@@ -2,14 +2,13 @@ name: Rust
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 env:
   CARGO_TERM_COLOR: always
   PROFILE: release
-  BIN_NAME: mcmodsmgr
 
 jobs:
   build-linux:
@@ -17,23 +16,23 @@ jobs:
     timeout-minutes: 10
     env:
       TARGET: x86_64-unknown-linux-musl
+      BIN_NAME: mcmodsmgr
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Build
-      run: docker run -u root:root -v $(pwd):/home/rust/src ekidd/rust-musl-builder cargo build --target $TARGET --$PROFILE
-    - name: Chown
-      run: sudo chown $(id -u):$(id -g) -R .
-    # - name: Strip
-    #   run: strip target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
-    - name: Run tests
-      run: cargo test --verbose
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: executable-linux
-        path: target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
-
+      - uses: actions/checkout@v2
+      - name: Build
+        run: docker run -u root:root -v $(pwd):/home/rust/src ekidd/rust-musl-builder cargo build --target $TARGET --$PROFILE
+      - name: Chown
+        run: sudo chown $(id -u):$(id -g) -R .
+      # - name: Strip
+      #   run: strip target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
+      - name: Run tests
+        run: cargo test --verbose
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: executable-linux
+          path: target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
 
   build:
     runs-on: ${{matrix.os}}
@@ -48,28 +47,30 @@ jobs:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             osname: windows
+            bin_name: mcmodsmgr.exe
           - target: x86_64-apple-darwin
             os: macos-latest
             osname: macos
+            bin_name: mcmodsmgr
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Install Rust Toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
-        target: ${{matrix.target}}
+      - uses: actions/checkout@v2
+      - name: Install Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          target: ${{matrix.target}}
 
-    - name: Build
-      run: cargo build --${{env.PROFILE}} --target ${{matrix.target}}
+      - name: Build
+        run: cargo build --${{env.PROFILE}} --target ${{matrix.target}}
 
-    - name: Run tests
-      run: cargo test
+      - name: Run tests
+        run: cargo test
 
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: executable-${{matrix.osname}}
-        path: target/${{matrix.target}}/${{env.PROFILE}}/${{env.BIN_NAME}}*
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: executable-${{matrix.osname}}
+          path: target/${{matrix.target}}/${{env.PROFILE}}/${{env.BIN_NAME}}
