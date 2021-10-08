@@ -1,5 +1,7 @@
 # Minecraft Mods Manager
 
+[![Rust](https://github.com/shosatojp/mcmodsmgr/actions/workflows/rust.yml/badge.svg)](https://github.com/shosatojp/mcmodsmgr/actions/workflows/rust.yml)
+
 ## Install
 
 ```sh
