@@ -30,7 +30,7 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
       - name: Rename
-        run: mv target/${{matrix.target}}/${{env.PROFILE}}/${{env.BIN_NAME}} ${{env.PROJECT_NAME}}-${{env.TARGET}}
+        run: mv target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}} ${{env.PROJECT_NAME}}-${{env.TARGET}}
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
