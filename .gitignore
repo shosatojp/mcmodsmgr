@@ -1,5 +1,6 @@
 .cargo/
 target/
+artifacts/
 
 *.json
 *.html
