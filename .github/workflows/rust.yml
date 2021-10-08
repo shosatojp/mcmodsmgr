@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 10
     env:
       TARGET: x86_64-unknown-linux-musl
-      BIN_NAME: mcmodsmgr
+      BIN_NAME: mcmodsmgr-x86_64-unknown-linux-musl
 
     steps:
       - uses: actions/checkout@v2
@@ -47,11 +47,11 @@ jobs:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             osname: windows
-            bin_name: mcmodsmgr.exe
+            bin_name: mcmodsmgr-x86_64-pc-windows-msvc.exe
           - target: x86_64-apple-darwin
             os: macos-latest
             osname: macos
-            bin_name: mcmodsmgr
+            bin_name: mcmodsmgr-x86_64-apple-darwin
 
     steps:
       - uses: actions/checkout@v2
