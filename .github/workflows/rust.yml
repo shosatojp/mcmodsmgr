@@ -23,7 +23,7 @@ jobs:
     - name: Build
       run: docker run -u root:root -v $(pwd):/home/rust/src ekidd/rust-musl-builder cargo build --target $TARGET --$PROFILE
     - name: Chown
-      run: sudo chown $(id -u):$(id -g) target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
+      run: sudo chown $(id -u):$(id -g) -R .
     # - name: Strip
     #   run: strip target/${{env.TARGET}}/${{env.PROFILE}}/${{env.BIN_NAME}}
     - name: Run tests
