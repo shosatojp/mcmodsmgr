@@ -1,6 +1,7 @@
-use crate::api::curseforge;
 pub use crate::api::curseforge_types::Addon;
+use crate::lockfile::LockfileEntry;
 use crate::util;
+use crate::{api::curseforge, lockfile::Lockfile};
 
 pub async fn search(name: &str) -> Result<(), String> {
     // search & filter
@@ -24,6 +25,7 @@ pub async fn install(
     fileid: Option<usize>,
     filename: Option<&str>,
     latest_only: bool,
+    lockfile: &mut Lockfile,
 ) -> Result<(), String> {
     // search mod
     let target = match util::search_multiple_candidates(slug).await {
@@ -47,6 +49,14 @@ pub async fn install(
             let file = files.first().unwrap();
             eprintln!("downloading {} ...", file.fileName);
             util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
+
+            lockfile.add_lockfile_entry(LockfileEntry {
+                registry: "curseforge.com".to_string(),
+                addonId: target.id,
+                fileId: file.id,
+                fileName: file.fileName.to_string(),
+                slug: target.slug,
+            });
             return Ok(());
         }
         0 => {

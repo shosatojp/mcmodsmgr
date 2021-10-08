@@ -3,6 +3,7 @@ extern crate prettytable;
 
 mod cli;
 mod commands;
+mod lockfile;
 mod util;
 mod tests {
     pub mod util;
@@ -17,6 +18,7 @@ mod api {
 
 pub use api::curseforge_types::{Addon, AddonFile};
 use clap::crate_name;
+use lockfile::Lockfile;
 use std::process::exit;
 
 #[tokio::main]
@@ -26,6 +28,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("{}", err.message);
         exit(0)
     });
+
+    let lockfile_path = root_matches
+        .value_of("lockfile")
+        .unwrap_or(".mods-lock.json");
+    let mut lockfile = Lockfile::new(lockfile_path);
 
     match root_matches.subcommand() {
         ("search", Some(matches)) => {
@@ -41,6 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .and_then(|e| Some(e.parse::<usize>().unwrap())),
                 matches.value_of("filename"),
                 !root_matches.is_present("full"),
+                &mut lockfile,
             )
             .await?;
         }
