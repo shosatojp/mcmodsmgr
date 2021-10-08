@@ -16,11 +16,16 @@ mod api {
 }
 
 pub use api::curseforge_types::{Addon, AddonFile};
+use clap::crate_name;
+use std::process::exit;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = cli::build_cli();
-    let root_matches = app.get_matches_safe()?;
+    let root_matches = app.get_matches_safe().unwrap_or_else(|err| {
+        println!("{}", err.message);
+        exit(0)
+    });
 
     match root_matches.subcommand() {
         ("search", Some(matches)) => {
@@ -49,7 +54,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?;
         }
         (_, _) => {
-            // unreachable
+            eprintln!("Use \"{} -h\" to see the help", crate_name!());
+            exit(1)
         }
     }
     Ok(())
