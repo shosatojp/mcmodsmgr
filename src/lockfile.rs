@@ -1,6 +1,6 @@
 use core::result::Result;
 use prettytable::{row, Table};
-use regex::{self, Regex};
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::{
     fs::File,
@@ -37,15 +37,12 @@ pub struct LockfileEntry {
 pub struct Lockfile {
     content: LockfileContent,
     path: String,
-    is_url_regex: Regex,
 }
 
 impl Lockfile {
     pub async fn new(path: &str) -> Result<Lockfile, String> {
-        let is_url = regex::Regex::new("^https?://.*").unwrap();
-
         // normarize path
-        let (_content, path) = if is_url.is_match(path) {
+        let (_content, path) = if Lockfile::is_local_file(path) {
             (Lockfile::load_http(path).await, path.to_string())
         } else {
             let _path = std::path::PathBuf::from(path);
@@ -63,7 +60,6 @@ impl Lockfile {
             Ok(content) => Ok(Lockfile {
                 path: path.to_string(),
                 content: content,
-                is_url_regex: is_url,
             }),
             Err(_) => Ok(Lockfile {
                 path: path.to_string(),
@@ -71,7 +67,6 @@ impl Lockfile {
                     version: LOCKFILE_VERSION.to_string(),
                     installed: vec![],
                 },
-                is_url_regex: is_url,
             }),
         }
     }
@@ -97,7 +92,7 @@ impl Lockfile {
     }
 
     pub fn save(&self) -> Result<(), String> {
-        if !self.is_local_file() {
+        if !Lockfile::is_local_file(&self.path) {
             return Err("cannot write to remote file".to_string());
         }
 
@@ -131,8 +126,9 @@ impl Lockfile {
         &self.content
     }
 
-    fn is_local_file(&self) -> bool {
-        !self.is_url_regex.is_match(&self.path)
+    pub fn is_local_file(path: &str) -> bool {
+        let is_url = Regex::new("^https?://.*").unwrap();
+        !is_url.is_match(path)
     }
 
     pub fn print(&self) {
