@@ -84,7 +84,8 @@ pub fn build_cli() -> App<'static, 'static> {
             App::new("describe")
                 .about("describe a mod and list available files")
                 .arg(Arg::with_name("name").takes_value(true).required(true)),
-        );
+        )
+        .subcommand(App::new("list").about("list installed mods"));
 
     app
 }
