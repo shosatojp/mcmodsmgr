@@ -46,6 +46,15 @@ pub fn build_cli() -> App<'static, 'static> {
                 .global(true)
                 .takes_value(true),
         )
+        .arg(
+            Arg::with_name("dir")
+                .help("directory to place mod file(s)")
+                .short("d")
+                .long("dir")
+                .global(true)
+                .default_value(".")
+                .takes_value(true),
+        )
         .subcommand(
             App::new("search")
                 .about("search mods from curseforge.com")
@@ -70,13 +79,6 @@ pub fn build_cli() -> App<'static, 'static> {
                     Arg::with_name("filename")
                         .short("n")
                         .long("filename")
-                        .takes_value(true),
-                )
-                .arg(
-                    Arg::with_name("dir")
-                        .help("directory to place mod file(s)")
-                        .short("d")
-                        .long("dir")
                         .takes_value(true),
                 ),
         )
