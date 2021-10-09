@@ -65,6 +65,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
             .await?;
         }
+        ("list", Some(_)) => {
+            commands::list(&lockfile);
+        }
         (_, _) => {
             eprintln!("Use \"{} -h\" to see the help", crate_name!());
             exit(1)

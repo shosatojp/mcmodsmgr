@@ -177,3 +177,9 @@ pub async fn describe(
     util::print_files(&files);
     Ok(())
 }
+
+pub fn list(lockfile: &Lockfile) {
+    lockfile.print();
+    let mods_count = lockfile.get_content().get_installed().len();
+    println!("{} mods installed", mods_count);
+}
