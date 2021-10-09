@@ -20,5 +20,5 @@ pull:
 	mkdir -p $(ARTIFACTS_DIR)
 	gh run download -n executable -D $(ARTIFACTS_DIR)
 
-release:
+release: pull
 	gh release create "v$(VERSION)" $(ARTIFACTS_DIR)/*
