@@ -10,7 +10,7 @@ use std::{
 const LOCKFILE_VERSION: &str = "1";
 
 #[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq)]
 pub struct LockfileContent {
     pub version: String,
     installed: Vec<LockfileEntry>,
@@ -23,7 +23,7 @@ impl LockfileContent {
 }
 
 #[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq)]
 pub struct LockfileEntry {
     pub registry: String,
     pub addonId: usize,
@@ -110,7 +110,16 @@ impl Lockfile {
     }
 
     pub fn add_lockfile_entry(&mut self, lockfileentry: LockfileEntry) -> Result<(), String> {
-        self.content.installed.push(lockfileentry);
+        let no_duplicate = self
+            .get_content()
+            .get_installed()
+            .iter()
+            .all(|entry| entry != &lockfileentry);
+
+        if no_duplicate {
+            self.content.installed.push(lockfileentry);
+        }
+
         self.save()
     }
 
