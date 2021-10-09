@@ -26,12 +26,13 @@ pub async fn install(
     modloader: Option<&str>,
     fileid: Option<usize>,
     filename: Option<&str>,
+    target_dir: &Path,
     latest_only: bool,
     lockfile: &mut Lockfile,
     lockfile_ref: Option<Lockfile>,
 ) -> Result<(), String> {
     match lockfile_ref {
-        Some(lockfile_ref) => install_with_ref(lockfile, lockfile_ref).await,
+        Some(lockfile_ref) => install_with_ref(lockfile, lockfile_ref, target_dir).await,
         None => {
             install_with_search(
                 slug,
@@ -39,6 +40,7 @@ pub async fn install(
                 modloader,
                 fileid,
                 filename,
+                target_dir,
                 latest_only,
                 lockfile,
             )
@@ -50,6 +52,7 @@ pub async fn install(
 pub async fn install_with_ref(
     lockfile: &mut Lockfile,
     lockfile_ref: Lockfile,
+    target_dir: &Path,
 ) -> Result<(), String> {
     for entry in lockfile_ref.get_content().get_installed() {
         eprintln!("fetching file info for {}", &entry.slug);
@@ -60,9 +63,19 @@ pub async fn install_with_ref(
                 continue;
             }
         };
-        if !Path::new(&file.fileName).exists() {
+
+        // download
+        let pathbuf = target_dir.join(&file.fileName);
+        let path = match pathbuf.to_str() {
+            Some(s) => Path::new(s),
+            None => {
+                println!("failed to get path");
+                continue;
+            }
+        };
+        if !path.exists() {
             eprintln!("downloading {} ...", file.fileName);
-            util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
+            util::download_file(&file.downloadUrl, path).await?;
         } else {
             eprintln!("file already exists. skip");
             continue;
@@ -91,6 +104,7 @@ pub async fn install_with_search(
     modloader: Option<&str>,
     fileid: Option<usize>,
     filename: Option<&str>,
+    target_dir: &Path,
     latest_only: bool,
     lockfile: &mut Lockfile,
 ) -> Result<(), String> {
@@ -119,9 +133,17 @@ pub async fn install_with_search(
     match files.len() {
         1 => {
             let file = files.first().unwrap();
-            if !Path::new(&file.fileName).exists() {
+            let pathbuf = target_dir.join(&file.fileName);
+            let path = match pathbuf.to_str() {
+                Some(s) => Path::new(s),
+                None => {
+                    println!("failed to get path");
+                    return Err("failed to get path".to_string());
+                }
+            };
+            if !path.exists() {
                 eprintln!("downloading {} ...", file.fileName);
-                util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
+                util::download_file(&file.downloadUrl, path).await?;
             } else {
                 eprintln!("file already exists. skip");
                 return Err("file already exists. skip".to_string());

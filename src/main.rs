@@ -19,7 +19,7 @@ mod api {
 pub use api::curseforge_types::{Addon, AddonFile};
 use clap::crate_name;
 use lockfile::Lockfile;
-use std::process::exit;
+use std::{path::Path, process::exit};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -29,8 +29,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         exit(0)
     });
 
-    let lockfile_path = root_matches.value_of("lockfile").unwrap();
-    let mut lockfile = Lockfile::new(lockfile_path).await?;
+    // join path
+    let target_dir = Path::new(root_matches.value_of("dir").unwrap());
+    let _lockfile_path = root_matches.value_of("lockfile").unwrap();
+    let lockfile_path = if Lockfile::is_local_file(_lockfile_path) {
+        let pathbuf = target_dir.join(_lockfile_path);
+        match pathbuf.to_str() {
+            Some(s) => s.to_string(),
+            None => {
+                eprintln!("failed to get path");
+                return Err("failed to get path".to_string())?;
+            }
+        }
+    } else {
+        _lockfile_path.to_string()
+    };
+
+    let mut lockfile = Lockfile::new(&lockfile_path).await?;
 
     let lockfile_ref = match root_matches.value_of("lockfileref") {
         Some(path) => Some(Lockfile::new(path).await?),
@@ -50,6 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .value_of("fileid")
                     .and_then(|e| Some(e.parse::<usize>().unwrap())),
                 matches.value_of("filename"),
+                target_dir,
                 !root_matches.is_present("full"),
                 &mut lockfile,
                 lockfile_ref,
