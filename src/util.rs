@@ -1,3 +1,5 @@
+use clap::crate_name;
+
 use crate::api::curseforge;
 use crate::api::curseforge_types::AddonFileDetail;
 use crate::Addon;
@@ -15,6 +17,46 @@ pub async fn download_file(url: &str, path: &str) -> Result<(), String> {
         .or(Err("failed to get body"))?;
     let _ = file.write(&content);
     Ok(())
+}
+
+pub async fn download_file_chunked(url: &str, path: &str) -> Result<(), String> {
+    let mut file = std::fs::File::create(path).or(Err("failed to open file"))?;
+    let mut res = reqwest::get(url).await.or(Err("failed to request"))?;
+    if !res.status().is_success() {
+        return Err("an error occured on get file".to_string());
+    }
+    while let Some(chunk) = res.chunk().await.or(Err("failed to get chunk"))? {
+        let _ = file.write(&chunk);
+    }
+    Ok(())
+}
+
+pub async fn download_file_chunked_with_temp(url: &str, path: &str) -> Result<(), String> {
+    loop {
+        let mut temp_path = std::env::temp_dir();
+        let rand_value: usize = rand::random();
+        temp_path.push(format!("{}.{}.tmp", crate_name!(), rand_value));
+
+        if temp_path.exists() {
+            continue;
+        } else {
+            download_file_chunked(url, temp_path.to_str().ok_or("failed to get path str")?).await?;
+            std::fs::copy(&temp_path, path).or(Err("failed to copy"))?;
+            std::fs::remove_file(&temp_path).or(Err("failed to remove"))?;
+            break;
+        }
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_download_file_chunked_with_temp() {
+    let url = "https://avatars.githubusercontent.com/u/40783705";
+    let path = "test.png";
+    match download_file_chunked_with_temp(url, path).await {
+        Ok(_) => println!("ok"),
+        Err(err) => eprintln!("{:?}", err),
+    }
 }
 
 pub fn print_addons(addons: &Vec<Addon>) {
