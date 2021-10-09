@@ -4,11 +4,14 @@
 
 ## Install
 
-```sh
-cargo install mcmodsmgr
-```
+- Download executable from [here](https://github.com/shosatojp/mcmodsmgr/releases/latest)
+- or `cargo install`
 
-> `$HOME/.cargo/bin` should be in your `$PATH`
+    ```sh
+    cargo install mcmodsmgr
+    ```
+
+    > `$HOME/.cargo/bin` should be in your `$PATH`
 
 ## Usage
 
