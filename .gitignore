@@ -5,5 +5,8 @@ artifacts/
 *.json
 *.html
 *.jar
+*.png
+*.jpg
+*.jpeg
 
 .envrc

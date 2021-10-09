@@ -75,7 +75,7 @@ pub async fn install_with_ref(
         };
         if !path.exists() {
             eprintln!("downloading {} ...", file.fileName);
-            util::download_file(&file.downloadUrl, path).await?;
+            util::download_file_chunked_with_temp(&file.downloadUrl, path).await?;
         } else {
             eprintln!("file already exists. skip");
             continue;
@@ -143,7 +143,7 @@ pub async fn install_with_search(
             };
             if !path.exists() {
                 eprintln!("downloading {} ...", file.fileName);
-                util::download_file(&file.downloadUrl, path).await?;
+                util::download_file_chunked_with_temp(&file.downloadUrl, path).await?;
             } else {
                 eprintln!("file already exists. skip");
                 return Err("file already exists. skip".to_string());
