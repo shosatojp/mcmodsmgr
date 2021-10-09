@@ -1,6 +1,6 @@
 [package]
 name = "mcmodsmgr"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2018"
 description = "Manage Minecraft mods registered at curseforge.com"
 license = "MIT"
