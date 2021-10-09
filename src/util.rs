@@ -4,8 +4,9 @@ use crate::Addon;
 use core::result::Result;
 use std::collections::HashSet;
 use std::io::Write;
+use std::path::Path;
 
-pub async fn download_file(url: &str, path: &str) -> Result<(), String> {
+pub async fn download_file(url: &str, path: &Path) -> Result<(), String> {
     let mut file = std::fs::File::create(path).or(Err("failed to open file"))?;
     let content = reqwest::get(url)
         .await
