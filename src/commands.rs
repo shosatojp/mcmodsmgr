@@ -119,8 +119,13 @@ pub async fn install_with_search(
     match files.len() {
         1 => {
             let file = files.first().unwrap();
-            eprintln!("downloading {} ...", file.fileName);
-            util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
+            if !Path::new(&file.fileName).exists() {
+                eprintln!("downloading {} ...", file.fileName);
+                util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
+            } else {
+                eprintln!("file already exists. skip");
+                return Err("file already exists. skip".to_string());
+            }
 
             lockfile
                 .add_lockfile_entry(LockfileEntry {
