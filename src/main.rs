@@ -29,10 +29,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         exit(0)
     });
 
-    let lockfile_path = root_matches
-        .value_of("lockfile")
-        .unwrap_or(".mods-lock.json");
-    let mut lockfile = Lockfile::new(lockfile_path);
+    let lockfile_path = root_matches.value_of("lockfile").unwrap();
+    let mut lockfile = Lockfile::new(lockfile_path).await?;
+
+    let lockfile_ref = match root_matches.value_of("lockfileref") {
+        Some(path) => Some(Lockfile::new(path).await?),
+        None => None,
+    };
 
     match root_matches.subcommand() {
         ("search", Some(matches)) => {
@@ -40,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         ("install", Some(matches)) => {
             commands::install(
-                matches.value_of("name").unwrap(),
+                matches.value_of("name"),
                 root_matches.value_of("mcversion"),
                 root_matches.value_of("modloader"),
                 matches
@@ -49,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("filename"),
                 !root_matches.is_present("full"),
                 &mut lockfile,
+                lockfile_ref,
             )
             .await?;
         }

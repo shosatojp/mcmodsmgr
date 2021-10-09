@@ -2,6 +2,8 @@ pub use crate::api::curseforge_types::Addon;
 use crate::lockfile::LockfileEntry;
 use crate::util;
 use crate::{api::curseforge, lockfile::Lockfile};
+use core::result::Result;
+use std::path::Path;
 
 pub async fn search(name: &str) -> Result<(), String> {
     // search & filter
@@ -19,7 +21,72 @@ pub async fn search(name: &str) -> Result<(), String> {
 }
 
 pub async fn install(
-    slug: &str,
+    slug: Option<&str>,
+    version: Option<&str>,
+    modloader: Option<&str>,
+    fileid: Option<usize>,
+    filename: Option<&str>,
+    latest_only: bool,
+    lockfile: &mut Lockfile,
+    lockfile_ref: Option<Lockfile>,
+) -> Result<(), String> {
+    match lockfile_ref {
+        Some(lockfile_ref) => install_with_ref(lockfile, lockfile_ref).await,
+        None => {
+            install_with_search(
+                slug,
+                version,
+                modloader,
+                fileid,
+                filename,
+                latest_only,
+                lockfile,
+            )
+            .await
+        }
+    }
+}
+
+pub async fn install_with_ref(
+    lockfile: &mut Lockfile,
+    lockfile_ref: Lockfile,
+) -> Result<(), String> {
+    for entry in lockfile_ref.get_content().get_installed() {
+        eprintln!("fetching file info for {}", &entry.slug);
+        let file = match curseforge::get_file(entry.addonId, entry.fileId).await {
+            Ok(file) => file,
+            Err(err) => {
+                println!("{:?}", &err);
+                continue;
+            }
+        };
+        if !Path::new(&file.fileName).exists() {
+            eprintln!("downloading {} ...", file.fileName);
+            util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
+        } else {
+            eprintln!("file already exists. skip");
+            continue;
+        }
+
+        // skip if local and ref lockfile is same
+        if lockfile.get_path() != lockfile_ref.get_path() {
+            println!("writing to lockfile");
+            lockfile
+                .add_lockfile_entry(LockfileEntry {
+                    registry: "curseforge.com".to_string(),
+                    addonId: entry.addonId,
+                    fileId: file.id,
+                    fileName: file.fileName.to_string(),
+                    slug: entry.slug.clone(),
+                })
+                .unwrap_or_else(|msg| println!("{}", msg));
+        }
+    }
+    Ok(())
+}
+
+pub async fn install_with_search(
+    slug: Option<&str>,
     version: Option<&str>,
     modloader: Option<&str>,
     fileid: Option<usize>,
@@ -27,6 +94,11 @@ pub async fn install(
     latest_only: bool,
     lockfile: &mut Lockfile,
 ) -> Result<(), String> {
+    let slug = match slug {
+        Some(slug) => slug,
+        None => return Err("name is required".to_string()),
+    };
+
     // search mod
     let target = match util::search_multiple_candidates(slug).await {
         Ok(value) => value,
@@ -50,13 +122,15 @@ pub async fn install(
             eprintln!("downloading {} ...", file.fileName);
             util::download_file(&file.downloadUrl, &format!("{}", &file.fileName)).await?;
 
-            lockfile.add_lockfile_entry(LockfileEntry {
-                registry: "curseforge.com".to_string(),
-                addonId: target.id,
-                fileId: file.id,
-                fileName: file.fileName.to_string(),
-                slug: target.slug,
-            });
+            lockfile
+                .add_lockfile_entry(LockfileEntry {
+                    registry: "curseforge.com".to_string(),
+                    addonId: target.id,
+                    fileId: file.id,
+                    fileName: file.fileName.to_string(),
+                    slug: target.slug,
+                })
+                .unwrap_or_else(|msg| println!("{}", msg));
             return Ok(());
         }
         0 => {
