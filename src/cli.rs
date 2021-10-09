@@ -36,6 +36,14 @@ pub fn build_cli() -> App<'static, 'static> {
                 .short("L")
                 .long("lockfile")
                 .global(true)
+                .default_value(".mods-lock.json")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("lockfileref")
+                .short("R")
+                .long("lockfileref")
+                .global(true)
                 .takes_value(true),
         )
         .subcommand(
@@ -46,7 +54,7 @@ pub fn build_cli() -> App<'static, 'static> {
         .subcommand(
             App::new("install")
                 .about("download and place mod file")
-                .arg(Arg::with_name("name").takes_value(true).required(true))
+                .arg(Arg::with_name("name").takes_value(true))
                 .arg(
                     Arg::with_name("fileid")
                         .short("f")
