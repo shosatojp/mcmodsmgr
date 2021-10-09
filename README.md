@@ -28,8 +28,14 @@ mcmodsmgr describe jei
 
 ```sh
 # filter by version
-mcmodsmgr -v 1.12.2 install jei
+mcmodsmgr install jei -v 1.12.2
 
 # filter by version and modloader
-mcmodsmgr -v 1.12.2 -l forge install jei
+mcmodsmgr install jei -v 1.12.2 -l forge
+
+# referencing published mods list by server
+mcmodsmgr install -R https://some-modded-server.com/.mods-lock.json
+
+# referencing mods list file
+mcmodsmgr install -R other-env/.mods-lock.json
 ```
